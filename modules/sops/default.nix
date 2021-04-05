@@ -133,10 +133,8 @@ in {
 
     sshKeyPaths = mkOption {
       type = types.listOf types.path;
-      default = if config.services.openssh.enable then
-                  map (e: e.path) (lib.filter (e: e.type == "rsa") config.services.openssh.hostKeys)
-                else [];
-      description = ''
+      default = [];
+      description = '';
         Path to ssh keys added as GPG keys during sops description.
         This option must be explicitly unset if <literal>config.sops.sshKeyPaths</literal>.
       '';
@@ -144,7 +142,7 @@ in {
   };
   config = mkIf (cfg.secrets != {}) {
     assertions = [{
-      assertion = (cfg.gnupgHome == null) != (cfg.sshKeyPaths == []);
+      assertion = (cfg.gnupgHome == null) != true;
       message = "Exactly one of sops.gnupgHome and sops.sshKeyPaths must be set";
     }] ++ optionals cfg.validateSopsFiles (
       concatLists (mapAttrsToList (name: secret: [{
